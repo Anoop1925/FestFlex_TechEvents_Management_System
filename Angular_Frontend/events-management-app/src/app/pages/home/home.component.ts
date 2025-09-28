@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild, Inject, PLATFORM_ID, HostListener } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { Subscription, interval } from 'rxjs';
 import { EventService } from '../../services/event.service';
 import { CommentService } from '../../services/comment.service';
@@ -122,6 +122,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     private themeService: ThemeService,
     private feedbackService: FeedbackService,
     private router: Router,
+    private route: ActivatedRoute,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -132,6 +133,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.startEventTimer();
     this.loadCompletedEventsCount();
     this.testBackendConnection();
+    this.checkForAuthRedirect();
   }
 
   ngAfterViewInit(): void {
@@ -247,6 +249,18 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.feedbackOverlayTimeout) {
       clearTimeout(this.feedbackOverlayTimeout);
     }
+  }
+
+  private checkForAuthRedirect(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['showLogin'] === 'true' && params['feature'] && isPlatformBrowser(this.platformId)) {
+        const featureName = params['feature'] === 'calendar' ? 'Calendar' : 'Results';
+        // Delay to ensure the component is fully loaded
+        setTimeout(() => {
+          this.showLoginRequiredPopup(`access the ${featureName.toLowerCase()}`);
+        }, 500);
+      }
+    });
   }
 
   openFeedbackForm(): void {
@@ -568,6 +582,10 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private showLoginRequiredPopup(action: string): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    
     const popup = document.createElement('div');
     popup.innerHTML = `
       <div style="
@@ -719,8 +737,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     // Add click handlers
     popup.querySelector('#loginBtn')?.addEventListener('click', () => {
       document.body.removeChild(popup);
-      // TODO: Navigate to login page
-      console.log('Navigating to login page');
+      this.router.navigate(['/auth/signin']);
     });
     
     popup.querySelector('#closeBtn')?.addEventListener('click', () => {

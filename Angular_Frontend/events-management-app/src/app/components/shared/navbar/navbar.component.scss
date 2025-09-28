@@ -625,3 +625,24 @@
     }
   }
 }
+
+// Calendar and Results Link Styles
+.nav-item {
+  &.calendar-link,
+  &.results-link {
+    &.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      
+      &:hover {
+        background: transparent !important;
+        color: rgba(255, 255, 255, 0.7) !important;
+        transform: none !important;
+      }
+    }
+    
+    &:not(.disabled) {
+      cursor: pointer;
+    }
+  }
+}

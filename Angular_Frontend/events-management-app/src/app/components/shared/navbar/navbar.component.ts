@@ -147,16 +147,41 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return 'name' in user && 'adminId' in user && !('userId' in user);
   }
 
+  handleCalendarClick(event: Event): void {
+    if (!this.isLoggedIn) {
+      event.preventDefault();
+      this.showLoginRequiredPopup('Calendar', 'calendar');
+    }
+    // If logged in, let the routerLink handle navigation
+  }
+
+  handleResultsClick(event: Event): void {
+    if (!this.isLoggedIn) {
+      event.preventDefault();
+      this.showLoginRequiredPopup('Results', 'results');
+    }
+    // If logged in, let the routerLink handle navigation
+  }
+
   navigateToCalendar(): void {
     if (this.isLoggedIn) {
       this.router.navigate(['/calendar']);
     } else {
       // Show popup for login requirement
-      this.showLoginRequiredPopup();
+      this.showLoginRequiredPopup('Calendar', 'calendar');
     }
   }
 
-  private showLoginRequiredPopup(): void {
+  navigateToResults(): void {
+    if (this.isLoggedIn) {
+      this.router.navigate(['/results']);
+    } else {
+      // Show popup for login requirement
+      this.showLoginRequiredPopup('Results', 'results');
+    }
+  }
+
+  private showLoginRequiredPopup(featureName: string = 'Calendar', featureType: string = 'calendar'): void {
     // Only run in browser environment
     if (!isPlatformBrowser(this.platformId)) {
       return;
@@ -225,10 +250,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
             z-index: 1;
           ">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-              <line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/>
-              <line x1="3" y1="10" x2="21" y2="10"/>
+              ${featureType === 'calendar' ? 
+                `<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                 <line x1="16" y1="2" x2="16" y2="6"/>
+                 <line x1="8" y1="2" x2="8" y2="6"/>
+                 <line x1="3" y1="10" x2="21" y2="10"/>` :
+                `<path d="M9 11H15"/>
+                 <path d="M9 15H12"/>
+                 <path d="M16 6L18.29 8.29C18.3834 8.38373 18.4572 8.49813 18.5065 8.6244C18.5558 8.75067 18.5794 8.88615 18.5758 9.02195C18.5722 9.15775 18.5415 9.29142 18.4852 9.41441C18.4289 9.5374 18.3482 9.64705 18.248 9.736L9 19H5V15L14.29 5.71C14.3834 5.61663 14.4981 5.54284 14.6244 5.49354C14.7507 5.44424 14.8862 5.42058 15.022 5.42405C15.1578 5.42753 15.2914 5.45805 15.4144 5.51395C15.5374 5.56986 15.6471 5.6502 15.736 5.75L16 6Z"/>`
+              }
             </svg>
           </div>
           <h3 style="
@@ -251,7 +281,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
             position: relative;
             z-index: 1;
           ">
-            You need to login to access the calendar feature. Please sign in to continue and explore your personalized event schedule.
+            You need to login to access the ${featureName.toLowerCase()} feature. Please sign in to continue and explore your personalized ${featureName.toLowerCase()}.
           </p>
           <div style="display: flex; gap: 1rem; justify-content: center; position: relative; z-index: 1;">
             <button id="loginBtn" style="

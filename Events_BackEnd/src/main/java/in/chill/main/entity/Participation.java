@@ -1,6 +1,18 @@
 package in.chill.main.entity;
 
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "participation")
@@ -11,11 +23,11 @@ public class Participation {
     @Column(name = "participation_id")
     private int participationId;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "registration_id", referencedColumnName = "registration_id")
     private Registration registration;
     
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "event_id", referencedColumnName = "event_id")
     private Events event;
     
@@ -23,6 +35,7 @@ public class Participation {
     private float eventAmount;
     
     @OneToOne(mappedBy = "participation", cascade = CascadeType.ALL)
+    @JsonIgnore
     private Result result;
     
     // Default constructor
