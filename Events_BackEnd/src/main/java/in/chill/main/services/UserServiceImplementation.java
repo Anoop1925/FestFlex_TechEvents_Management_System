@@ -107,6 +107,11 @@ public class UserServiceImplementation implements UserService {
     }
     
     @Override
+    public Optional<User> findById(Long userId) {
+        return userRepository.findById(userId);
+    }
+    
+    @Override
     public UserResponse getUserProfile(Long userId) {
         Optional<User> userOptional = userRepository.findById(userId);
         

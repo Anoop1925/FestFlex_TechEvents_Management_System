@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild, Inject, PLATFORM_ID, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ElementRef, ViewChild, Inject, PLATFORM_ID, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { Subscription, interval } from 'rxjs';
@@ -8,6 +8,7 @@ import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
 import { FeedbackService } from '../../services/feedback.service';
 import { FooterComponent } from '../../components/shared/footer/footer.component';
+import { CommentModalComponent } from '../../components/comment-modal/comment-modal.component';
 import { Event } from '../../models/event.model';
 import { Comment } from '../../models/comment.model';
 import { User, Admin } from '../../models/user.model';
@@ -15,7 +16,7 @@ import { User, Admin } from '../../models/user.model';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, FooterComponent],
+  imports: [CommonModule, RouterModule, FooterComponent, CommentModalComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
@@ -55,6 +56,9 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   showFeedbackOverlay = false;
   feedbackOverlayTimeout: any;
   speechBubbleText = '';
+  
+  // Comment modal properties
+  showCommentModal = false;
   
   // Cursor trail and particles
   cursorTrail: Array<{id: number, x: number, y: number, emoji: string}> = [];
@@ -123,6 +127,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     private feedbackService: FeedbackService,
     private router: Router,
     private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -190,11 +195,12 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       this.commentService.getRecentComments(3).subscribe({
         next: (comments: Comment[]) => {
           this.recentComments = comments;
+          this.cdr.detectChanges();
         },
         error: (error) => {
           console.error('Error fetching recent comments:', error);
-          // Fallback to mock comments
-          this.loadMockComments();
+          this.recentComments = [];
+          this.cdr.detectChanges();
         }
       })
     );
@@ -572,13 +578,25 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   addComment(): void {
     if (this.isLoggedIn) {
-      // Open comment modal or navigate to comment page
-      console.log('Adding comment');
-      // TODO: Implement comment adding logic
+      this.showCommentModal = true;
     } else {
       // Show popup for login requirement
       this.showLoginRequiredPopup('comment on this post');
     }
+  }
+
+  onCommentModalClose(): void {
+    this.showCommentModal = false;
+  }
+
+  onCommentAdded(comment: Comment): void {
+    // Add the new comment to the beginning of the array
+    this.recentComments.unshift(comment);
+    // Keep only the latest 3 comments for display
+    if (this.recentComments.length > 3) {
+      this.recentComments = this.recentComments.slice(0, 3);
+    }
+    this.cdr.detectChanges();
   }
 
   private showLoginRequiredPopup(action: string): void {
@@ -922,9 +940,18 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   viewMoreComments(): void {
-    // Navigate to comments page or load more comments
-    console.log('Loading more comments');
-    // TODO: Implement more comments logic
+    // Load all comments instead of just recent ones
+    this.subscriptions.add(
+      this.commentService.getAllComments().subscribe({
+        next: (comments: Comment[]) => {
+          this.recentComments = comments.slice(0, 10); // Show up to 10 comments
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Error fetching more comments:', error);
+        }
+      })
+    );
   }
   
   // Mock data methods for fallback when backend is unavailable
@@ -989,33 +1016,23 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     }, 0);
   }
 
-  private loadMockComments(): void {
-    this.recentComments = [
-      {
-        commentId: 1,
-        content: 'Excited for the upcoming tech fest! The lineup looks amazing.',
-        userName: 'Alex Kumar',
-        userEmail: 'alex@example.com',
-        userId: 101,
-        dateTime: new Date('2025-09-10')
-      },
-      {
-        commentId: 2,
-        content: 'The cultural night last year was fantastic. Can\'t wait for this year!',
-        userName: 'Priya Sharma',
-        userEmail: 'priya@example.com',
-        userId: 102,
-        dateTime: new Date('2025-09-09')
-      },
-      {
-        commentId: 3,
-        content: 'Great to see so many innovative events being organized.',
-        userName: 'Rahul Singh',
-        userEmail: 'rahul@example.com',
-        userId: 103,
-        dateTime: new Date('2025-09-08')
+  // Helper method to get user initials from full name (for comment avatars)
+  getCommentUserInitials(userName: string): string {
+    if (!userName) return 'U';
+    
+    const name = userName.trim();
+    if (name.includes(' ')) {
+      // If name has space, use first letter of each word
+      const parts = name.split(' ').filter(part => part.length > 0);
+      if (parts.length >= 2) {
+        return `${parts[0].charAt(0).toUpperCase()}${parts[1].charAt(0).toUpperCase()}`;
       }
-    ];
+    }
+    
+    // Fallback - use first two letters or just first if too short
+    return name.length > 1 ? 
+      `${name.charAt(0).toUpperCase()}${name.charAt(1).toUpperCase()}` : 
+      name.charAt(0).toUpperCase();
   }
   
   // Test backend connectivity

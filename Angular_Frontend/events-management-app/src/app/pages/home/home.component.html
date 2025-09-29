@@ -177,7 +177,7 @@
       <div class="comment-card" *ngFor="let comment of recentComments">
         <div class="comment-header">
           <div class="comment-avatar">
-            {{ comment.userName.charAt(0).toUpperCase() }}
+            {{ getCommentUserInitials(comment.userName) }}
           </div>
           <div class="comment-info">
             <h4 class="comment-author">{{ comment.userName }}</h4>
@@ -196,6 +196,13 @@
       </button>
     </div>
   </section>
+
+  <!-- Comment Modal -->
+  <app-comment-modal 
+    *ngIf="showCommentModal"
+    (close)="onCommentModalClose()"
+    (commentAdded)="onCommentAdded($event)">
+  </app-comment-modal>
 
   <!-- Shared Footer Component -->
   <app-footer [currentPage]="'home'"></app-footer>
