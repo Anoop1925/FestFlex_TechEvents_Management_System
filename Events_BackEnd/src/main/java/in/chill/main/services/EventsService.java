@@ -16,5 +16,6 @@ public interface EventsService{
 	public Optional<Events> getNextEvent();
 	public List<Events> getUpcomingEvents();
 	public int getCompletedEventsCount();
+	public Float getEventFee(int eventId);
 
 }

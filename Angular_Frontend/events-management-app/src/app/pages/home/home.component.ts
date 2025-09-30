@@ -568,8 +568,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   registerForEvent(event: Event): void {
     if (this.isLoggedIn) {
       // Navigate to registration page
-      console.log('Registering for event:', event.event_name);
-      // TODO: Implement registration logic
+      this.router.navigate(['/event-registration', event.event_id]);
     } else {
       // Show popup for login requirement
       this.showLoginRequiredPopup('register for this event');
@@ -582,6 +581,17 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     } else {
       // Show popup for login requirement
       this.showLoginRequiredPopup('comment on this post');
+    }
+  }
+
+  // Smooth scroll to events section
+  scrollToEvents(): void {
+    const eventsSection = document.getElementById('events-section');
+    if (eventsSection) {
+      eventsSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
     }
   }
 
@@ -1092,8 +1102,13 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   // View event details method
   viewEventDetails(event: any): void {
     console.log('Viewing details for event:', event.event_name);
-    // TODO: Navigate to event details page
-    // this.router.navigate(['/events', event.event_id]);
+    // Navigate to the same event registration page
+    if (this.isLoggedIn) {
+      this.router.navigate(['/event-registration', event.event_id]);
+    } else {
+      // Show popup for login requirement
+      this.showLoginRequiredPopup('view details for this event');
+    }
   }
 
   // Toggle favorite status for events

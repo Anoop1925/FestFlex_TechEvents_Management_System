@@ -1,19 +1,26 @@
 package in.chill.main.services;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import in.chill.main.entity.Events;
+import in.chill.main.entity.Participation;
 import in.chill.main.repository.EventsRepository;
+import in.chill.main.repository.ParticipationRepository;
 
 @Service
 public class EventsServiceImplementation implements EventsService {
 	
 	@Autowired
 	private EventsRepository eventsRepository;
+	
+	@Autowired
+	private ParticipationRepository participationRepository;
 	
 	@Override
 	public Events createEvent(Events event) {
@@ -65,6 +72,56 @@ public class EventsServiceImplementation implements EventsService {
 	@Override
 	public int getCompletedEventsCount() {
 		return eventsRepository.countCompletedEvents();
+	}
+	
+	@Override
+	public Float getEventFee(int eventId) {
+		// First, try to get the most common fee from existing participations for this event
+		List<Participation> participations = participationRepository.findByEventId(eventId);
+		
+		if (!participations.isEmpty()) {
+			// Find the most common fee amount (excluding 0.0 fees)
+			Map<Float, Integer> feeCount = new HashMap<>();
+			for (Participation participation : participations) {
+				float fee = participation.getEventAmount();
+				// Only count non-zero fees
+				if (fee > 0) {
+					feeCount.put(fee, feeCount.getOrDefault(fee, 0) + 1);
+				}
+			}
+			
+			// Return the most common non-zero fee
+			Optional<Float> mostCommonFee = feeCount.entrySet().stream()
+				.max(Map.Entry.comparingByValue())
+				.map(Map.Entry::getKey);
+				
+			if (mostCommonFee.isPresent()) {
+				return mostCommonFee.get();
+			}
+		}
+		
+		// If no participations exist, return default fee based on event type
+		return getDefaultFeeByEventType(eventId);
+	}
+	
+	private Float getDefaultFeeByEventType(int eventId) {
+		Optional<Events> eventOpt = eventsRepository.findById(eventId);
+		if (eventOpt.isPresent()) {
+			Events event = eventOpt.get();
+			String eventType = event.getEvent_type();
+			
+			// Default fee structure based on event type (matching frontend logic)
+			switch (eventType) {
+				case "Technical": return 500.0f;
+				case "Cultural": return 300.0f;
+				case "Sports": return 400.0f;
+				case "Workshop": return 250.0f;
+				case "Conference": return 750.0f;
+				case "Competition": return 600.0f;
+				default: return 350.0f;
+			}
+		}
+		return 350.0f; // Default fallback fee
 	}
 
 }

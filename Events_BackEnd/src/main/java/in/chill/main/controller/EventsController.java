@@ -85,6 +85,12 @@ public class EventsController {
 		return ResponseEntity.ok(count);
 	}
 	
+	@GetMapping("/events/{id}/fee")
+	public ResponseEntity<Float> getEventFee(@PathVariable int id){
+		Float fee = eventService.getEventFee(id);
+		return ResponseEntity.ok(fee);
+	}
+	
 	@PutMapping("/events/{id}")
 	public ResponseEntity<Events> updateEventDetails(@PathVariable int id, @RequestBody Events event){
 		Events updatedEvent = eventService.updateEventDetails(id, event);

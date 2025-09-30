@@ -9,6 +9,7 @@ import { CalendarComponent } from './pages/calendar/calendar.component';
 import { SigninComponent } from './pages/auth/signin/signin.component';
 import { StudentLoginComponent } from './pages/auth/student-login/student-login.component';
 import { AdminLoginComponent } from './pages/auth/admin-login/admin-login.component';
+import { EventRegistrationComponent } from './pages/event-registration/event-registration.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -20,6 +21,7 @@ export const routes: Routes = [
   { path: 'feedback', component: FeedbackComponent },
   { path: 'results', component: ResultsComponent, canActivate: [authGuard] },
   { path: 'calendar', component: CalendarComponent, canActivate: [authGuard] },
+  { path: 'event-registration/:id', component: EventRegistrationComponent },
   { path: 'auth/signin', component: SigninComponent },
   { path: 'auth/signup', redirectTo: 'auth/student-login', pathMatch: 'full' },
   { path: 'auth/student-login', component: StudentLoginComponent },

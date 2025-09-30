@@ -27,6 +27,8 @@ function getFeatureFromUrl(url: string): string {
     return 'calendar';
   } else if (url.includes('/results')) {
     return 'results';
+  } else if (url.includes('/event-registration')) {
+    return 'registration';
   } else if (url.includes('/') || url === '/') {
     return 'comments';
   }

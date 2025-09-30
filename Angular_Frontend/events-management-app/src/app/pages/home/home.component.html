@@ -16,7 +16,7 @@
             <button class="primary-cta" *ngIf="!isLoggedIn" routerLink="/auth/login">
               <span>Get Started Today</span>
             </button>
-            <button class="secondary-cta" routerLink="/events">
+            <button class="secondary-cta" (click)="scrollToEvents()">
               <span>Explore Events</span>
             </button>
           </div>
@@ -80,7 +80,7 @@
   </section>
 
   <!-- Section 3: Upcoming Events Display -->
-  <section class="events-section">
+  <section class="events-section" id="events-section">
     <div class="section-header">
       <h2 class="section-title">Upcoming Events</h2>
       <p class="section-subtitle">Discover exciting opportunities to learn, grow, and connect</p>
