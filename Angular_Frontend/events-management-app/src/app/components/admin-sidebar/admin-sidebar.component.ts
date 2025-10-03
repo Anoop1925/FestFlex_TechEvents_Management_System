@@ -1,5 +1,5 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, PLATFORM_ID, Inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
@@ -19,6 +19,8 @@ export class AdminSidebarComponent implements OnInit {
   showAccountDropdown = false;
   showModulesDropdown = false;
 
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+
   ngOnInit(): void {
     // Subscribe to auth changes to get real-time user data
     this.authService.currentUser$.subscribe(user => {
@@ -28,15 +30,19 @@ export class AdminSidebarComponent implements OnInit {
     // Also get immediate value
     this.currentUser = this.authService.getCurrentUser();
     
-    // Load theme preference from localStorage
-    const savedTheme = localStorage.getItem('admin-theme');
-    this.isDarkMode = savedTheme === 'dark';
-    this.applyTheme();
+    // Load theme preference from localStorage (only in browser)
+    if (isPlatformBrowser(this.platformId)) {
+      const savedTheme = localStorage.getItem('admin-theme');
+      this.isDarkMode = savedTheme === 'dark';
+      this.applyTheme();
+    }
   }
 
   toggleTheme(): void {
     this.isDarkMode = !this.isDarkMode;
-    localStorage.setItem('admin-theme', this.isDarkMode ? 'dark' : 'light');
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('admin-theme', this.isDarkMode ? 'dark' : 'light');
+    }
     this.applyTheme();
   }
 

@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from './components/shared/navbar/navbar.component';
@@ -23,7 +24,10 @@ export class AppComponent implements OnInit {
   title = 'FestFlex Events Management';
   isAdminRoute = false;
   
-  constructor(private router: Router) {
+  constructor(
+    private router: Router,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
     // Initialize application
     console.log('🚀 FestFlex Application Started');
     console.log('🚀 NavbarComponent imported:', !!NavbarComponent);
@@ -45,6 +49,11 @@ export class AppComponent implements OnInit {
   }
 
   private checkAdminSession(): void {
+    // Only run in browser environment (not during SSR)
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     try {
       // Check if user data exists in localStorage
       const userDataStr = localStorage.getItem('userData');
@@ -64,7 +73,9 @@ export class AppComponent implements OnInit {
     } catch (error) {
       console.error('Error checking admin session:', error);
       // If there's an error parsing userData, clear it
-      localStorage.removeItem('userData');
+      if (isPlatformBrowser(this.platformId)) {
+        localStorage.removeItem('userData');
+      }
     }
   }
 }

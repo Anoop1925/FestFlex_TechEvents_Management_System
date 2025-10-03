@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
@@ -24,7 +25,10 @@ interface BackendComment {
 export class CommentService {
   private apiUrl = environment.apiUrl || 'http://localhost:8080';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
 
   // Get recent comments (for home page) - public endpoint
   getRecentComments(limit: number = 3): Observable<Comment[]> {
@@ -52,6 +56,10 @@ export class CommentService {
 
   // Create new comment (requires authentication)
   createComment(content: string): Observable<Comment> {
+    if (!isPlatformBrowser(this.platformId)) {
+      return throwError(() => new Error('Not running in browser'));
+    }
+
     const token = localStorage.getItem('authToken');
     if (!token) {
       return throwError(() => new Error('Authentication token not found'));
@@ -74,6 +82,10 @@ export class CommentService {
 
   // Delete comment (requires authentication)
   deleteComment(commentId: number): Observable<void> {
+    if (!isPlatformBrowser(this.platformId)) {
+      return throwError(() => new Error('Not running in browser'));
+    }
+
     const token = localStorage.getItem('authToken');
     if (!token) {
       return throwError(() => new Error('Authentication token not found'));
@@ -94,6 +106,10 @@ export class CommentService {
 
   // Get comments by user (requires authentication)
   getCommentsByUserId(userId: number): Observable<Comment[]> {
+    if (!isPlatformBrowser(this.platformId)) {
+      return throwError(() => new Error('Not running in browser'));
+    }
+
     const token = localStorage.getItem('authToken');
     if (!token) {
       return throwError(() => new Error('Authentication token not found'));

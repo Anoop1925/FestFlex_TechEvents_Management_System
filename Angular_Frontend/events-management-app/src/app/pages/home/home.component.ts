@@ -159,17 +159,27 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private loadData(): void {
+    // Only load data in browser environment
+    if (!isPlatformBrowser(this.platformId)) {
+      console.log('⏭️ Skipping data load during SSR');
+      return;
+    }
+
     // Load upcoming events with filtering
     this.subscriptions.add(
       this.eventService.getUpcomingEvents().subscribe({
         next: (events: Event[]) => {
+          console.log('📥 Received events from backend:', events);
           // Filter out past events
           this.upcomingEvents = this.filterUpcomingEvents(events);
           this.calculateEventPagination();
           console.log('✅ Loaded', this.upcomingEvents.length, 'upcoming events (past events filtered)');
+          console.log('📋 Upcoming events:', this.upcomingEvents);
+          // Force change detection
+          this.cdr.detectChanges();
         },
         error: (error) => {
-          console.error('Error fetching upcoming events:', error);
+          console.error('❌ Error fetching upcoming events:', error);
           // Fallback to mock data if backend is unavailable
           this.loadMockEvents();
         }
@@ -180,10 +190,13 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.subscriptions.add(
       this.eventService.getNextEvent().subscribe({
         next: (event: Event) => {
+          console.log('⏰ Next event received:', event);
           this.nextEvent = event;
+          // Force change detection
+          this.cdr.detectChanges();
         },
         error: (error) => {
-          console.error('Error fetching next event:', error);
+          console.error('❌ Error fetching next event:', error);
           // Fallback to mock next event
           this.loadMockNextEvent();
         }
@@ -276,6 +289,11 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private startEventTimer(): void {
+    // Only start timer in browser environment
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     this.timerInterval = setInterval(() => {
       this.updateEventTimer();
     }, 1000);
@@ -1047,6 +1065,11 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
   
   // Test backend connectivity
   private testBackendConnection(): void {
+    // Only run in browser
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     // Simple API health check
     this.eventService.getAllEvents().subscribe({
       next: (events) => {
@@ -1168,6 +1191,11 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // Load completed events count
   private loadCompletedEventsCount(): void {
+    // Only run in browser
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     // First, let's get all events and count completed ones on frontend side
     this.eventService.getAllEvents().subscribe({
       next: (allEvents: Event[]) => {
@@ -1187,11 +1215,15 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         this.completedEventsCount = completedCount;
         console.log(`✅ Calculated completed events count: ${completedCount} out of ${allEvents.length} total events`);
         
+        // Force change detection
+        this.cdr.detectChanges();
+        
         // Fallback to dedicated endpoint if available
         this.eventService.getCompletedEventsCount().subscribe({
           next: (count: number) => {
             this.completedEventsCount = count;
             console.log('✅ Backend completed events count:', count);
+            this.cdr.detectChanges();
           },
           error: (error) => {
             console.log('⚠️ Backend endpoint not available, using calculated count:', this.completedEventsCount);

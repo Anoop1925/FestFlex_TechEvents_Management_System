@@ -1,5 +1,5 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef, PLATFORM_ID, Inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -44,7 +44,8 @@ export class AdminAdminsComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.adminForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
@@ -64,6 +65,11 @@ export class AdminAdminsComponent implements OnInit {
    * Load current admin ID from localStorage for self-delete protection
    */
   loadCurrentAdminId() {
+    // Only run in browser environment
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     const userData = localStorage.getItem('userData');
     if (userData) {
       try {
