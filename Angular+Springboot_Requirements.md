@@ -871,22 +871,12 @@ Admins access a completely distinct interface optimized for data management and 
    * Clicking create opens forms as overlays.
    * Delete actions prompt confirmation.
 
-4. **Results Upload via CSV**
-
-   * Due to the bulk nature of results data:
-
-     * Downloadable CSV template with correct datatypes.
-     * Upload feature to attach and import filled results.
-   * Duplicate entries are detected and prevented.
-   * Admin guidance is provided below the download button explaining rules like datatype constraints.
-   * Mention in the steps sections that the csv template contains example data for reference, so delete the reference data beofre filling the actual values...
-
-5. **Recent Activities**
+4. **Recent Activities**
 
    * Shows all actions (creation/updation/deletion) over the past 30 days.
    * Sorted from latest to oldest.
 
-6. **Help Icon**
+5. **Help Icon**
 
    * A floating “?” icon providing assistance with CRUD operations.
    * Offers in-context guidance.
@@ -930,11 +920,8 @@ Admins access a completely distinct interface optimized for data management and 
 * `calendar-page.png`: It has to be present as an overlay, image shown for just reference.
 * `sidebar-bottom.png`: It has to be present as an overlay, image shown for just reference.
 
-**CSV Files**
 
-* `results-template.csv`: Template file for results upload with correct datatype columns. 
-
-**Image & CSV Storage Locations**
+**Image Storage Locations**
 
 ```
 Images: C:\Users\LENOVO\OneDrive\Desktop\FSD_Events\Reference_Images

@@ -72,11 +72,14 @@ public class FeedbackController {
     }
     
     @DeleteMapping("/feedbacks/{id}")
-    public ResponseEntity<Void> deleteFeedback(@PathVariable int id) {
+    public ResponseEntity<String> deleteFeedback(@PathVariable int id) {
         try {
+            System.out.println("DELETE request received for feedback ID: " + id);
             feedbackService.deleteFeedback(id);
-            return ResponseEntity.ok().build();
+            System.out.println("Feedback deleted successfully: " + id);
+            return ResponseEntity.ok("Feedback deleted successfully");
         } catch (Exception e) {
+            System.out.println("Error deleting feedback: " + e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }

@@ -56,11 +56,14 @@ public class VenueController {
     }
     
     @DeleteMapping("/venues/{id}")
-    public ResponseEntity<Void> deleteVenue(@PathVariable int id) {
+    public ResponseEntity<?> deleteVenue(@PathVariable int id) {
+        System.out.println("DELETE request received for venue ID: " + id);
         try {
             venueService.deleteVenue(id);
-            return ResponseEntity.ok().build();
+            System.out.println("Venue deleted successfully: " + id);
+            return ResponseEntity.ok().body("Venue deleted successfully");
         } catch (Exception e) {
+            System.err.println("Error deleting venue " + id + ": " + e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }

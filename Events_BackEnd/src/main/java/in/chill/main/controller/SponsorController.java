@@ -1,6 +1,7 @@
 package in.chill.main.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import in.chill.main.dto.SponsorDTO;
 import in.chill.main.entity.Sponsor;
 import in.chill.main.services.SponsorService;
 
@@ -26,15 +28,34 @@ public class SponsorController {
     private SponsorService sponsorService;
     
     @GetMapping("/sponsors")
-    public List<Sponsor> getAllSponsors() {
-        return sponsorService.getAllSponsors();
+    public List<SponsorDTO> getAllSponsors() {
+        return sponsorService.getAllSponsors().stream()
+            .map(sponsor -> new SponsorDTO(
+                sponsor.getSponsorId(),
+                sponsor.getName(),
+                sponsor.getIsCash(),
+                sponsor.getMode(),
+                sponsor.getContact(),
+                sponsor.getClub() != null ? sponsor.getClub().getClub_id() : null,
+                sponsor.getClub() != null ? sponsor.getClub().getName() : null
+            ))
+            .collect(Collectors.toList());
     }
     
     @GetMapping("/sponsors/{id}")
-    public ResponseEntity<Sponsor> getSponsorById(@PathVariable int id) {
+    public ResponseEntity<SponsorDTO> getSponsorById(@PathVariable int id) {
         Sponsor sponsor = sponsorService.getSponsorById(id).orElse(null);
         if (sponsor != null) {
-            return ResponseEntity.ok(sponsor);
+            SponsorDTO dto = new SponsorDTO(
+                sponsor.getSponsorId(),
+                sponsor.getName(),
+                sponsor.getIsCash(),
+                sponsor.getMode(),
+                sponsor.getContact(),
+                sponsor.getClub() != null ? sponsor.getClub().getClub_id() : null,
+                sponsor.getClub() != null ? sponsor.getClub().getName() : null
+            );
+            return ResponseEntity.ok(dto);
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -56,11 +77,14 @@ public class SponsorController {
     }
     
     @DeleteMapping("/sponsors/{id}")
-    public ResponseEntity<Void> deleteSponsor(@PathVariable int id) {
+    public ResponseEntity<?> deleteSponsor(@PathVariable int id) {
+        System.out.println("DELETE request received for sponsor ID: " + id);
         try {
             sponsorService.deleteSponsor(id);
-            return ResponseEntity.ok().build();
+            System.out.println("Sponsor deleted successfully: " + id);
+            return ResponseEntity.ok().body("Sponsor deleted successfully");
         } catch (Exception e) {
+            System.err.println("Error deleting sponsor " + id + ": " + e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }

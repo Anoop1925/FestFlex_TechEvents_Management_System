@@ -56,10 +56,11 @@ public class DepartmentController {
     }
     
     @DeleteMapping("/departments/{id}")
-    public ResponseEntity<Void> deleteDepartment(@PathVariable int id) {
+    public ResponseEntity<String> deleteDepartment(@PathVariable int id) {
         try {
             departmentService.deleteDepartment(id);
-            return ResponseEntity.ok().build();
+            System.out.println("Department with ID " + id + " deleted successfully");
+            return ResponseEntity.ok("Department deleted successfully");
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }

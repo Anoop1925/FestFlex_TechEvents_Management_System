@@ -42,7 +42,19 @@ public class JudgeServiceImplementation implements JudgeService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public void deleteJudge(int id) {
-        judgeRepository.deleteById(id);
+        if (!judgeRepository.existsById(id)) {
+            throw new RuntimeException("Judge not found with id: " + id);
+        }
+        // Delete in order: child records before parent
+        // Delete records from tables that reference events judged by this judge
+        judgeRepository.deleteResultsByJudgeId(id);
+        judgeRepository.deleteParticipationsByJudgeId(id);
+        judgeRepository.deleteBudgetsByJudgeId(id);
+        judgeRepository.deleteVolunteersByJudgeId(id);
+        judgeRepository.deleteEventsByJudgeId(id);
+        // Finally delete the judge itself
+        judgeRepository.deleteJudgeById(id);
     }
 } 

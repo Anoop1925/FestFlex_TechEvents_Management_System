@@ -1,6 +1,10 @@
 package in.chill.main.entity;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,8 +12,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import java.util.List;
 
 @Entity
 @Table(name = "registration")
@@ -32,6 +36,9 @@ public class Registration {
     @Column(name = "contact")
     private String contact;
     
+    @Column(name = "registered_at")
+    private LocalDateTime registeredAt;
+    
     @OneToMany(mappedBy = "registration", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Feedback> feedbacks;
@@ -49,6 +56,23 @@ public class Registration {
         this.college = college;
         this.email = email;
         this.contact = contact;
+    }
+    
+    // Constructor with timestamp
+    public Registration(String name, String college, String email, String contact, LocalDateTime registeredAt) {
+        this.name = name;
+        this.college = college;
+        this.email = email;
+        this.contact = contact;
+        this.registeredAt = registeredAt;
+    }
+    
+    // Auto-set timestamp before persist if not set
+    @PrePersist
+    protected void onCreate() {
+        if (registeredAt == null) {
+            registeredAt = LocalDateTime.now();
+        }
     }
     
     // Getters and setters
@@ -90,6 +114,14 @@ public class Registration {
     
     public void setContact(String contact) {
         this.contact = contact;
+    }
+    
+    public LocalDateTime getRegisteredAt() {
+        return registeredAt;
+    }
+    
+    public void setRegisteredAt(LocalDateTime registeredAt) {
+        this.registeredAt = registeredAt;
     }
     
     public List<Feedback> getFeedbacks() {

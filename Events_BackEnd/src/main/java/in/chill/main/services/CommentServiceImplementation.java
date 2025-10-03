@@ -2,12 +2,14 @@ package in.chill.main.services;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import in.chill.main.dto.CommentDTO;
 import in.chill.main.entity.Comment;
 import in.chill.main.repository.CommentRepository;
 
@@ -20,6 +22,20 @@ public class CommentServiceImplementation implements CommentService {
     @Override
     public List<Comment> getAllComments() {
         return commentRepository.findAllOrderByCreatedAtDesc();
+    }
+    
+    @Override
+    public List<CommentDTO> getAllCommentsDTO() {
+        return commentRepository.findAllOrderByCreatedAtDesc().stream()
+            .map(comment -> new CommentDTO(
+                comment.getCommentId(),
+                comment.getContent(),
+                comment.getCreatedAt(),
+                comment.getUserId(),
+                comment.getUserName(),
+                comment.getUserEmail()
+            ))
+            .collect(Collectors.toList());
     }
 
     @Override

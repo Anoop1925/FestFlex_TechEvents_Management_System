@@ -45,6 +45,25 @@
   }
 }
 
+// Admin layout specific styles
+.app-container.admin-mode {
+  background: #F8FAFC;
+  
+  .main-content.admin-layout {
+    margin-top: 0;
+    
+    .page-wrapper.no-padding {
+      padding: 0;
+      max-width: none;
+    }
+  }
+}
+
+// Dark theme for admin mode
+:host-context([data-theme="dark"]) .app-container.admin-mode {
+  background: #0F172A;
+}
+
 // Router outlet styling for smooth transitions
 router-outlet + * {
   animation: fadeInSlide 0.4s ease-out;

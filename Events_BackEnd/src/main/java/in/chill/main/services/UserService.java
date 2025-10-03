@@ -1,11 +1,13 @@
 package in.chill.main.services;
 
+import java.util.List;
+import java.util.Optional;
+
+import in.chill.main.dto.AuthResponse;
 import in.chill.main.dto.LoginRequest;
 import in.chill.main.dto.RegisterRequest;
-import in.chill.main.dto.AuthResponse;
 import in.chill.main.dto.UserResponse;
 import in.chill.main.entity.User;
-import java.util.Optional;
 
 public interface UserService {
     
@@ -20,4 +22,8 @@ public interface UserService {
     UserResponse getUserProfile(Long userId);
     
     boolean existsByEmail(String email);
+    
+    List<UserResponse> getAllUsers();
+    
+    void deleteUser(Long userId);
 }

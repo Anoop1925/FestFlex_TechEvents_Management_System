@@ -34,10 +34,6 @@ public class Participation {
     @Column(name = "event_amount")
     private float eventAmount;
     
-    @OneToOne(mappedBy = "participation", cascade = CascadeType.ALL)
-    @JsonIgnore
-    private Result result;
-    
     // Default constructor
     public Participation() {}
     
@@ -79,14 +75,6 @@ public class Participation {
     
     public void setEventAmount(float eventAmount) {
         this.eventAmount = eventAmount;
-    }
-    
-    public Result getResult() {
-        return result;
-    }
-    
-    public void setResult(Result result) {
-        this.result = result;
     }
     
     @Override

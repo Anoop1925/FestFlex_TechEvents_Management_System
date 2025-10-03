@@ -56,11 +56,14 @@ public class ClubController {
     }
     
     @DeleteMapping("/clubs/{id}")
-    public ResponseEntity<Void> deleteClub(@PathVariable int id) {
+    public ResponseEntity<?> deleteClub(@PathVariable int id) {
+        System.out.println("DELETE request received for club ID: " + id);
         try {
             clubService.deleteClub(id);
-            return ResponseEntity.ok().build();
+            System.out.println("Club deleted successfully: " + id);
+            return ResponseEntity.ok().body("Club deleted successfully");
         } catch (Exception e) {
+            System.err.println("Error deleting club " + id + ": " + e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }

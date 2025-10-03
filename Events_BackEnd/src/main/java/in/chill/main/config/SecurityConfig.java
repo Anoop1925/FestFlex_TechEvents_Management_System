@@ -48,9 +48,11 @@ public class SecurityConfig {
             "http://192.168.56.1:4200",
             "http://192.168.0.115:4200"
         ));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
+        configuration.setExposedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(false); // Disable credentials to allow wildcard origins
+        configuration.setAllowedOriginPatterns(Arrays.asList("*")); // Use patterns instead of specific origins
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

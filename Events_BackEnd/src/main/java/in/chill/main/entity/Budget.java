@@ -1,13 +1,16 @@
 package in.chill.main.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity
@@ -27,14 +30,17 @@ public class Budget {
     
     @OneToOne
     @JoinColumn(name = "sponsor_id")
+    @JsonIgnoreProperties({"budget", "club"})
     private Sponsor sponsor;
     
     @OneToOne
     @JoinColumn(name = "club_id")
+    @JsonIgnoreProperties({"sponsors", "events", "volunteers", "budget"})
     private Club club;
     
     @OneToOne
     @JoinColumn(name = "event_id")
+    @JsonIgnoreProperties({"club", "venue", "results", "participations", "budgets", "volunteers"})
     private Events event;
     
     // Default constructor
@@ -96,6 +102,15 @@ public class Budget {
     
     public void setEvent(Events event) {
         this.event = event;
+    }
+    
+    // Validation: Ensure utilized amount doesn't exceed allocated amount
+    @PrePersist
+    @PreUpdate
+    private void validateBudget() {
+        if (this.utilizedAmount > this.allocatedAmount) {
+            throw new IllegalArgumentException("Utilized amount cannot exceed allocated amount");
+        }
     }
     
     @Override

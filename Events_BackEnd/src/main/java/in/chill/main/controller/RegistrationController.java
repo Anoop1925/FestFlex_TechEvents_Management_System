@@ -56,11 +56,14 @@ public class RegistrationController {
     }
     
     @DeleteMapping("/registrations/{id}")
-    public ResponseEntity<Void> deleteRegistration(@PathVariable int id) {
+    public ResponseEntity<String> deleteRegistration(@PathVariable int id) {
         try {
+            System.out.println("DELETE request received for registration ID: " + id);
             registrationService.deleteRegistration(id);
-            return ResponseEntity.ok().build();
+            System.out.println("Registration deleted successfully: " + id);
+            return ResponseEntity.ok("Registration deleted successfully");
         } catch (Exception e) {
+            System.out.println("Error deleting registration: " + e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }

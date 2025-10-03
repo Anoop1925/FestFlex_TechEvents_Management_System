@@ -1,14 +1,19 @@
 package in.chill.main.services;
 
-import in.chill.main.dto.*;
-import in.chill.main.entity.User;
-import in.chill.main.repository.UserRepository;
-import in.chill.main.util.JwtUtil;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import in.chill.main.dto.AuthResponse;
+import in.chill.main.dto.LoginRequest;
+import in.chill.main.dto.RegisterRequest;
+import in.chill.main.dto.UserResponse;
+import in.chill.main.entity.User;
+import in.chill.main.repository.UserRepository;
+import in.chill.main.util.JwtUtil;
 
 @Service
 public class UserServiceImplementation implements UserService {
@@ -134,5 +139,25 @@ public class UserServiceImplementation implements UserService {
     @Override
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+    
+    @Override
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+            .map(user -> new UserResponse(
+                user.getUserId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getCollege(),
+                user.getContact(),
+                user.getRole()
+            ))
+            .toList();
+    }
+    
+    @Override
+    public void deleteUser(Long userId) {
+        userRepository.deleteById(userId);
     }
 }

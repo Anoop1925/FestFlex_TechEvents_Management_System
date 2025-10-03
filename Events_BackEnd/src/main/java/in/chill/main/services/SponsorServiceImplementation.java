@@ -46,7 +46,14 @@ public class SponsorServiceImplementation implements SponsorService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public void deleteSponsor(int id) {
-        sponsorRepository.deleteById(id);
+        if (!sponsorRepository.existsById(id)) {
+            throw new RuntimeException("Sponsor not found with id: " + id);
+        }
+        // Delete in order: child records before parent
+        sponsorRepository.deleteBudgetsBySponsorId(id);
+        // Finally delete the sponsor itself
+        sponsorRepository.deleteSponsorById(id);
     }
 }

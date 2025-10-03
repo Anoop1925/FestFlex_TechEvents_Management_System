@@ -45,7 +45,21 @@ public class ClubServiceImplementation implements ClubService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public void deleteClub(int id) {
-        clubRepository.deleteById(id);
+        if (!clubRepository.existsById(id)) {
+            throw new RuntimeException("Club not found with id: " + id);
+        }
+        // Delete in order: child records before parent
+        // First delete records from tables that reference events created by this club
+        clubRepository.deleteResultsByClubId(id);
+        clubRepository.deleteParticipationsByClubId(id);
+        clubRepository.deleteBudgetsByClubId(id);
+        // Then delete records directly referencing this club
+        clubRepository.deleteVolunteersByClubId(id);
+        clubRepository.deleteSponsorsByClubId(id);
+        clubRepository.deleteEventsByClubId(id);
+        // Finally delete the club itself
+        clubRepository.deleteClubById(id);
     }
 } 

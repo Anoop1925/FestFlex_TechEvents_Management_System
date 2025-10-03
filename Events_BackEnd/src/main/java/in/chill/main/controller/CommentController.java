@@ -46,6 +46,25 @@ public class CommentController {
         return commentService.getAllComments();
     }
     
+    // Get all comments as DTO for admin (returns flattened structure)
+    @GetMapping("/admin/comments")
+    public List<in.chill.main.dto.CommentDTO> getAllCommentsForAdmin() {
+        System.out.println("GET request received for all comments (admin)");
+        return commentService.getAllCommentsDTO();
+    }
+    
+    // Delete comment by ID (admin endpoint - no auth check)
+    @DeleteMapping("/admin/comments/{id}")
+    public ResponseEntity<String> deleteCommentByAdmin(@PathVariable Long id) {
+        System.out.println("DELETE request received for comment ID: " + id);
+        try {
+            commentService.deleteComment(id);
+            return ResponseEntity.ok("Comment deleted successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    
     // Get recent comments with limit (public endpoint)
     @GetMapping("/comments/recent")
     public List<Comment> getRecentComments(@RequestParam(defaultValue = "3") int limit) {

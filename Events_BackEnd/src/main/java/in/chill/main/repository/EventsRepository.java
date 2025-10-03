@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -35,5 +36,30 @@ public interface EventsRepository extends JpaRepository<Events, Integer>{
 	// Count completed events (events where end date is before current date)
 	@Query(value = "SELECT COUNT(*) FROM events WHERE event_end_date::DATE < CURRENT_DATE", nativeQuery = true)
 	int countCompletedEvents();
+	
+	// Delete event with all related records - proper cascade delete
+	@Modifying
+	@Query(value = "DELETE FROM events WHERE event_id = ?1", nativeQuery = true)
+	void deleteEventById(int eventId);
+	
+	// Delete related budget records
+	@Modifying
+	@Query(value = "DELETE FROM budget WHERE event_id = ?1", nativeQuery = true)
+	void deleteBudgetsByEventId(int eventId);
+	
+	// Delete related participation records
+	@Modifying
+	@Query(value = "DELETE FROM participation WHERE event_id = ?1", nativeQuery = true)
+	void deleteParticipationsByEventId(int eventId);
+	
+	// Delete related result records  
+	@Modifying
+	@Query(value = "DELETE FROM result WHERE event_id = ?1", nativeQuery = true)
+	void deleteResultsByEventId(int eventId);
+	
+	// Delete related volunteer records
+	@Modifying
+	@Query(value = "DELETE FROM volunteer WHERE event_id = ?1", nativeQuery = true)
+	void deleteVolunteersByEventId(int eventId);
 
 }

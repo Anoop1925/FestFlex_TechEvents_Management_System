@@ -1,6 +1,7 @@
 package in.chill.main.entity;
 
-import jakarta.persistence.CascadeType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -34,10 +34,8 @@ public class Sponsor {
     
     @ManyToOne
     @JoinColumn(name = "club_id")
+    @JsonIgnoreProperties({"sponsors", "events", "volunteers", "budget"})
     private Club club;
-    
-    @OneToOne(mappedBy = "sponsor", cascade = CascadeType.ALL)
-    private Budget budget;
     
     // Default constructor
     public Sponsor() {}
@@ -98,14 +96,6 @@ public class Sponsor {
     
     public void setClub(Club club) {
         this.club = club;
-    }
-    
-    public Budget getBudget() {
-        return budget;
-    }
-    
-    public void setBudget(Budget budget) {
-        this.budget = budget;
     }
     
     @Override

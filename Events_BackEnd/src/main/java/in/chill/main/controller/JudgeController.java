@@ -56,11 +56,14 @@ public class JudgeController {
     }
     
     @DeleteMapping("/judges/{id}")
-    public ResponseEntity<Void> deleteJudge(@PathVariable int id) {
+    public ResponseEntity<?> deleteJudge(@PathVariable int id) {
+        System.out.println("DELETE request received for judge ID: " + id);
         try {
             judgeService.deleteJudge(id);
-            return ResponseEntity.ok().build();
+            System.out.println("Judge deleted successfully: " + id);
+            return ResponseEntity.ok().body("Judge deleted successfully");
         } catch (Exception e) {
+            System.err.println("Error deleting judge " + id + ": " + e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }

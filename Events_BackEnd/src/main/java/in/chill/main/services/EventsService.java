@@ -17,5 +17,8 @@ public interface EventsService{
 	public List<Events> getUpcomingEvents();
 	public int getCompletedEventsCount();
 	public Float getEventFee(int eventId);
+	
+	// Delete method
+	public void deleteEvent(int id);
 
 }

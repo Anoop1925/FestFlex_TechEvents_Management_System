@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import in.chill.main.entity.Events;
 import in.chill.main.entity.Participation;
@@ -122,6 +123,25 @@ public class EventsServiceImplementation implements EventsService {
 			}
 		}
 		return 350.0f; // Default fallback fee
+	}
+	
+	@Override
+	@Transactional
+	public void deleteEvent(int id) {
+		// Check if event exists
+		if (!eventsRepository.existsById(id)) {
+			throw new RuntimeException("Event not found with id: " + id);
+		}
+		
+		// Delete all related records first to avoid foreign key constraint violations
+		// Order matters: delete child records before parent
+		eventsRepository.deleteResultsByEventId(id);        // Delete results first
+		eventsRepository.deleteParticipationsByEventId(id); // Delete participations
+		eventsRepository.deleteBudgetsByEventId(id);        // Delete budgets
+		eventsRepository.deleteVolunteersByEventId(id);     // Delete volunteers
+		
+		// Finally delete the event itself
+		eventsRepository.deleteEventById(id);
 	}
 
 }

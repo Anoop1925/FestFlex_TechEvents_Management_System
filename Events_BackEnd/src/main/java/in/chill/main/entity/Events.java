@@ -1,6 +1,9 @@
 package in.chill.main.entity;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,7 +15,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.util.List;
 
 @Entity
 @Table(name = "Events")
@@ -70,14 +72,6 @@ public class Events {
 	@OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private List<Participation> participations;
-	
-	@OneToOne(mappedBy = "event", cascade = CascadeType.ALL)
-	@JsonIgnore
-	private Budget budget;
-	
-	@OneToOne(mappedBy = "event", cascade = CascadeType.ALL)
-	@JsonIgnore
-	private Result result;
 	
 	// Getters and setters
 	public int getEvent_id() {
@@ -180,21 +174,5 @@ public class Events {
 	
 	public void setParticipations(List<Participation> participations) {
 		this.participations = participations;
-	}
-	
-	public Budget getBudget() {
-		return budget;
-	}
-	
-	public void setBudget(Budget budget) {
-		this.budget = budget;
-	}
-	
-	public Result getResult() {
-		return result;
-	}
-	
-	public void setResult(Result result) {
-		this.result = result;
 	}
 }

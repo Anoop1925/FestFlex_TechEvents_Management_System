@@ -5,12 +5,14 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import in.chill.main.entity.Events;
@@ -21,7 +23,7 @@ import in.chill.main.services.VenueService;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 public class EventsController {
 	
 	@Autowired
@@ -131,6 +133,32 @@ public class EventsController {
 			return ResponseEntity.ok(updatedEvent);
 		}
 		else {
+			return ResponseEntity.notFound().build();
+		}
+	}
+	
+	// DELETE endpoint for events
+	@DeleteMapping("/events/{id}")
+	public ResponseEntity<?> deleteEvent(@PathVariable int id){
+		System.out.println("DELETE request received for event ID: " + id);
+		try {
+			eventService.deleteEvent(id);
+			System.out.println("Event deleted successfully: " + id);
+			return ResponseEntity.ok().body("Event deleted successfully");
+		} catch (Exception e) {
+			System.err.println("Error deleting event " + id + ": " + e.getMessage());
+			e.printStackTrace();
+			return ResponseEntity.notFound().build();
+		}
+	}
+	
+	// Legacy DELETE endpoint for backward compatibility
+	@DeleteMapping("/Event/{id}")
+	public ResponseEntity<?> deleteEventLegacy(@PathVariable int id){
+		try {
+			eventService.deleteEvent(id);
+			return ResponseEntity.ok().body("Event deleted successfully");
+		} catch (Exception e) {
 			return ResponseEntity.notFound().build();
 		}
 	}

@@ -1,17 +1,17 @@
 package in.chill.main.entity;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.util.List;
 
 @Entity
 @Table(name = "club")
@@ -46,10 +46,6 @@ public class Club {
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Sponsor> sponsors;
-    
-    @OneToOne(mappedBy = "club", cascade = CascadeType.ALL)
-    @JsonIgnore
-    private Budget budget;
     
     // Default constructor
     public Club() {}
@@ -125,14 +121,6 @@ public class Club {
     
     public void setSponsors(List<Sponsor> sponsors) {
         this.sponsors = sponsors;
-    }
-    
-    public Budget getBudget() {
-        return budget;
-    }
-    
-    public void setBudget(Budget budget) {
-        this.budget = budget;
     }
     
     @Override

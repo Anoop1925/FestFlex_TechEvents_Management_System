@@ -43,7 +43,20 @@ public class VenueServiceImplementation implements VenueService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public void deleteVenue(int id) {
-        venueRepository.deleteById(id);
+        if (!venueRepository.existsById(id)) {
+            throw new RuntimeException("Venue not found with id: " + id);
+        }
+        // Delete in order: child records before parent
+        // First delete records from tables that reference events at this venue
+        venueRepository.deleteResultsByVenueId(id);
+        venueRepository.deleteParticipationsByVenueId(id);
+        venueRepository.deleteBudgetsByVenueId(id);
+        // Then delete records directly referencing this venue
+        venueRepository.deleteVolunteersByVenueId(id);
+        venueRepository.deleteEventsByVenueId(id);
+        // Finally delete the venue itself
+        venueRepository.deleteVenueById(id);
     }
 } 

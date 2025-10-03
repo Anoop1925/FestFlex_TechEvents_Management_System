@@ -1,6 +1,7 @@
 package in.chill.main.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import in.chill.main.dto.ParticipationDTO;
 import in.chill.main.entity.Participation;
 import in.chill.main.services.ParticipationService;
 
@@ -26,15 +28,34 @@ public class ParticipationController {
     private ParticipationService participationService;
     
     @GetMapping("/participations")
-    public List<Participation> getAllParticipations() {
-        return participationService.getAllParticipations();
+    public List<ParticipationDTO> getAllParticipations() {
+        return participationService.getAllParticipations().stream()
+            .map(p -> new ParticipationDTO(
+                p.getParticipationId(),
+                p.getEventAmount(),
+                p.getRegistration() != null ? p.getRegistration().getRegistrationId() : null,
+                p.getRegistration() != null ? p.getRegistration().getName() : null,
+                p.getRegistration() != null ? p.getRegistration().getCollege() : null,
+                p.getEvent() != null ? p.getEvent().getEvent_id() : null,
+                p.getEvent() != null ? p.getEvent().getEvent_name() : null
+            ))
+            .collect(Collectors.toList());
     }
     
     @GetMapping("/participations/{id}")
-    public ResponseEntity<Participation> getParticipationById(@PathVariable int id) {
-        Participation participation = participationService.getParticipationById(id).orElse(null);
-        if (participation != null) {
-            return ResponseEntity.ok(participation);
+    public ResponseEntity<ParticipationDTO> getParticipationById(@PathVariable int id) {
+        Participation p = participationService.getParticipationById(id).orElse(null);
+        if (p != null) {
+            ParticipationDTO dto = new ParticipationDTO(
+                p.getParticipationId(),
+                p.getEventAmount(),
+                p.getRegistration() != null ? p.getRegistration().getRegistrationId() : null,
+                p.getRegistration() != null ? p.getRegistration().getName() : null,
+                p.getRegistration() != null ? p.getRegistration().getCollege() : null,
+                p.getEvent() != null ? p.getEvent().getEvent_id() : null,
+                p.getEvent() != null ? p.getEvent().getEvent_name() : null
+            );
+            return ResponseEntity.ok(dto);
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -56,11 +77,14 @@ public class ParticipationController {
     }
     
     @DeleteMapping("/participations/{id}")
-    public ResponseEntity<Void> deleteParticipation(@PathVariable int id) {
+    public ResponseEntity<String> deleteParticipation(@PathVariable int id) {
+        System.out.println("DELETE request received for participation ID: " + id);
         try {
             participationService.deleteParticipation(id);
-            return ResponseEntity.ok().build();
+            System.out.println("Participation deleted successfully: " + id);
+            return ResponseEntity.ok("Participation deleted successfully");
         } catch (Exception e) {
+            System.err.println("Error deleting participation " + id + ": " + e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
