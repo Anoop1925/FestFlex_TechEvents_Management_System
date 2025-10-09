@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface DashboardCounts {
   events: number;
@@ -29,7 +30,7 @@ export interface MonthlyRegistration {
   providedIn: 'root'
 })
 export class DashboardService {
-  private apiUrl = 'http://localhost:8080/api/admin/dashboard';
+  private apiUrl = `${environment.apiUrl}/api/admin/dashboard`;
 
   constructor(private http: HttpClient) {}
 
