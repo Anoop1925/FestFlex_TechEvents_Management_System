@@ -1,26 +1,13 @@
-# Use Java 21 image
-FROM openjdk:21-jdk-slim
-
-# Set working directory
+# Stage 1 — Build the WAR file using Maven
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 WORKDIR /app
-
-# Copy pom.xml and download dependencies first
 COPY pom.xml .
-COPY .mvn .mvn
-COPY mvnw .
-RUN ./mvnw dependency:go-offline
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-# Copy the rest of the code
-COPY . .
-
-# Build the WAR file inside Render's environment
-RUN ./mvnw clean package -DskipTests
-
-# Copy the WAR file into the container
-COPY target/ChillDude-1.0.war app.war
-
-# Expose port
+# Stage 2 — Run the application using OpenJDK
+FROM openjdk:21-jdk-slim
+WORKDIR /app
+COPY --from=builder /app/target/*.war app.war
 EXPOSE 8080
-
-# Start the application
-CMD ["java", "-jar", "app.war"]
+ENTRYPOINT ["java", "-jar", "app.war"]
