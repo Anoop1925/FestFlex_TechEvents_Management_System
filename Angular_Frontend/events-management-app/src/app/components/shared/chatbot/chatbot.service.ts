@@ -33,7 +33,7 @@ export class ChatbotService {
   public isLoading$ = this.isLoadingSubject.asObservable();
   public currentSession$ = this.currentSessionSubject.asObservable();
 
-  private baseUrl = environment.apiUrl || 'http://localhost:8080';
+  private baseUrl = environment.apiUrl;
   private siteContext: any = null;
 
     // --- streaming queue & controls ---

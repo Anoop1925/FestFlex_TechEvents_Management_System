@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, map, timeout, catchError, of } from 'rxjs';
 import { Feedback, FeedbackRequest, FeedbackResponse } from '../models/feedback.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FeedbackService {
-  private apiUrl = 'http://localhost:8080/api/feedbacks';
+  private apiUrl = `${environment.apiUrl}/api/feedbacks`;
   private readonly FEEDBACK_SUBMITTED_KEY = 'feedback_submitted';
 
   constructor(private http: HttpClient) {}

@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 import { DashboardService, DashboardCounts, MonthlyRegistration } from '../../../services/dashboard.service';
 
 interface EntityCount {
@@ -62,7 +63,7 @@ export class AdminDashboardComponent implements OnInit {
   error = '';
 
   // Mock API base URL - replace with actual backend endpoints
-  private apiUrl = 'http://localhost:8080/api';
+  private apiUrl = `${environment.apiUrl}/api`;
 
   ngOnInit(): void {
     this.loadDashboardData();

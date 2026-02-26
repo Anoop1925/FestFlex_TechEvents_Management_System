@@ -23,7 +23,7 @@ interface BackendComment {
   providedIn: 'root'
 })
 export class CommentService {
-  private apiUrl = environment.apiUrl || 'http://localhost:8080';
+  private apiUrl = environment.apiUrl;
 
   constructor(
     private http: HttpClient,

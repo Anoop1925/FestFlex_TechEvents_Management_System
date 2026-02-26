@@ -16,7 +16,7 @@ import {
   providedIn: 'root'
 })
 export class ResultService {
-  private apiUrl = (environment.apiUrl || 'http://localhost:8080') + '/api';
+  private apiUrl = `${environment.apiUrl}/api`;
   
   // BehaviorSubjects for reactive data management
   private resultsSubject = new BehaviorSubject<ResultDisplay[]>([]);
