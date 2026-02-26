@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'RAILWAY_BACKEND_URL_PLACEHOLDER',
+  apiUrl: 'https://festflex-backend-production.up.railway.app',
   geminiApiKey: '', // Will be handled by backend for security
   appName: 'FestFlex',
   version: '1.0.0',
