@@ -28,15 +28,15 @@ public interface EventsRepository extends JpaRepository<Events, Integer>{
 	
 	// Alternative queries using string comparison (more reliable for our string date format)
 	// Note: event_time contains format like "09:00 AM - 10:00 AM", so we compare only dates
-	// Cast VARCHAR date to DATE for comparison
-	@Query(value = "SELECT * FROM events WHERE event_start_date::DATE >= CURRENT_DATE ORDER BY event_start_date ASC, event_time ASC LIMIT 1", nativeQuery = true)
+	// Cast VARCHAR date to DATE for comparison safely
+	@Query(value = "SELECT * FROM events WHERE event_start_date IS NOT NULL AND event_start_date != '' AND event_start_date::DATE >= CURRENT_DATE ORDER BY event_start_date ASC, event_time ASC LIMIT 1", nativeQuery = true)
 	Optional<Events> findNextEventNative();
 	
-	@Query(value = "SELECT * FROM events WHERE event_start_date::DATE >= CURRENT_DATE ORDER BY event_start_date ASC, event_time ASC", nativeQuery = true)
+	@Query(value = "SELECT * FROM events WHERE event_start_date IS NOT NULL AND event_start_date != '' AND event_start_date::DATE >= CURRENT_DATE ORDER BY event_start_date ASC, event_time ASC", nativeQuery = true)
 	List<Events> findUpcomingEventsNative();
 	
 	// Count completed events (events where end date is before current date)
-	@Query(value = "SELECT COUNT(*) FROM events WHERE event_end_date::DATE < CURRENT_DATE", nativeQuery = true)
+	@Query(value = "SELECT COUNT(*) FROM events WHERE event_end_date IS NOT NULL AND event_end_date != '' AND event_end_date::DATE < CURRENT_DATE", nativeQuery = true)
 	int countCompletedEvents();
 	
 	// Delete event with all related records - proper cascade delete

@@ -1,1 +1,1 @@
-web: java -jar -Dserver.port=$PORT target/ChillDude-1.0.jar
+web: java -Xmx350m -Xss512k -XX:+UseContainerSupport -Dserver.port=$PORT -jar target/ChillDude-1.0.war

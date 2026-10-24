@@ -51,16 +51,44 @@ export class CalendarComponent implements OnInit, OnDestroy {
   
   // Event type colors
   private eventTypeColors: { [key: string]: string } = {
-    'Technical': '#3A72EC',
-    'Cultural': '#ec4899',
-    'Sports': '#10b981',
-    'Workshop': '#f59e0b',
-    'Competition': '#ef4444',
-    'Seminar': '#8b5cf6',
-    'Conference': '#06b6d4',
-    'Festival': '#f97316',
-    'default': '#6b7280'
+    'technical': '#3A72EC',          // Vibrant FestFlex Blue
+    'hackathon': '#6366F1',          // Indigo / Violet
+    'robotics': '#06B6D4',           // Cyan / Aqua
+    'competitive coding': '#8B5CF6',  // Vivid Purple
+    'coding': '#8B5CF6',             // Purple
+    'cultural': '#EC4899',           // Vibrant Hot Pink
+    'sports': '#10B981',             // Bright Emerald Green
+    'workshop': '#F59E0B',           // Amber Gold
+    'competition': '#EF4444',        // Crimson Red
+    'seminar': '#8B5CF6',            // Royal Purple
+    'conference': '#0284C7',         // Sky Blue
+    'festival': '#F97316',           // Tangerine Orange
+    'gaming': '#14B8A6',             // Teal
+    'webinar': '#6366F1',            // Indigo
+    'exhibition': '#F43F5E',         // Rose Coral
+    'design': '#EC4899',             // Pink
+    'ai': '#3A72EC',                 // Electric Blue
+    'music': '#E11D48',              // Crimson Rose
+    'dance': '#D946EF',              // Fuchsia
+    'quiz': '#EAB308',               // Golden Yellow
+    'drama': '#A855F7',              // Purple
+    'other': '#6366F1'               // Indigo
   };
+
+  private vibrantColorPalette: string[] = [
+    '#3A72EC', // Electric Blue
+    '#6366F1', // Indigo
+    '#06B6D4', // Cyan
+    '#8B5CF6', // Purple
+    '#EC4899', // Hot Pink
+    '#10B981', // Emerald
+    '#F59E0B', // Amber
+    '#EF4444', // Red
+    '#F97316', // Orange
+    '#14B8A6', // Teal
+    '#0284C7', // Sky Blue
+    '#D946EF'  // Fuchsia
+  ];
   
   // Month names
   readonly monthNames = [
@@ -553,7 +581,50 @@ export class CalendarComponent implements OnInit, OnDestroy {
    * Get color for event type (public method for template)
    */
   getEventColor(eventType: string): string {
-    return this.eventTypeColors[eventType] || this.eventTypeColors['default'];
+    if (!eventType || eventType.trim() === '') {
+      return '#3A72EC';
+    }
+
+    const normalized = eventType.trim().toLowerCase();
+
+    // 1. Direct exact match (case-insensitive)
+    if (this.eventTypeColors[normalized]) {
+      return this.eventTypeColors[normalized];
+    }
+
+    // 2. Keyword matching for common categories
+    if (normalized.includes('hack')) return '#6366F1';
+    if (normalized.includes('robot')) return '#06B6D4';
+    if (normalized.includes('code') || normalized.includes('program') || normalized.includes('algo')) return '#8B5CF6';
+    if (normalized.includes('tech') || normalized.includes('ai') || normalized.includes('cloud') || normalized.includes('web')) return '#3A72EC';
+    if (normalized.includes('cultur') || normalized.includes('art') || normalized.includes('music') || normalized.includes('dance')) return '#EC4899';
+    if (normalized.includes('sport') || normalized.includes('game') || normalized.includes('cricket') || normalized.includes('football')) return '#10B981';
+    if (normalized.includes('work') || normalized.includes('bootcamp') || normalized.includes('train')) return '#F59E0B';
+    if (normalized.includes('compet') || normalized.includes('contest') || normalized.includes('arena') || normalized.includes('champ')) return '#EF4444';
+    if (normalized.includes('seminar') || normalized.includes('talk') || normalized.includes('webinar')) return '#8B5CF6';
+    if (normalized.includes('confer') || normalized.includes('summit') || normalized.includes('symposium')) return '#0284C7';
+    if (normalized.includes('fest') || normalized.includes('carnival')) return '#F97316';
+
+    // 3. Deterministic hash to vibrant color palette so NO event is ever dull grey
+    let hash = 0;
+    for (let i = 0; i < normalized.length; i++) {
+      hash = normalized.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % this.vibrantColorPalette.length;
+    return this.vibrantColorPalette[index];
+  }
+
+  /**
+   * Get background tint for event type badges
+   */
+  getEventBadgeBackground(eventType: string): string {
+    const color = this.getEventColor(eventType);
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    const alpha = this.isDarkMode ? 0.25 : 0.16;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
   
   /**
@@ -569,23 +640,23 @@ export class CalendarComponent implements OnInit, OnDestroy {
    * Get the primary event type for a day (for background coloring)
    */
   getPrimaryEventType(events: Event[]): string {
-    if (events.length === 0) return 'default';
+    if (events.length === 0) return 'Technical';
     
     // If only one event, return its type
     if (events.length === 1) {
-      return events[0].event_type || 'default';
+      return events[0].event_type || 'Technical';
     }
     
-    // For multiple events, prioritize by importance order
-    const priorityOrder = ['Competition', 'Conference', 'Technical', 'Workshop', 'Seminar', 'Cultural', 'Sports', 'Festival'];
+    // For multiple events, prioritize by importance keywords
+    const priorityKeywords = ['hack', 'robot', 'code', 'compet', 'tech', 'work', 'cultur', 'sport', 'fest', 'confer', 'seminar'];
     
-    for (const priority of priorityOrder) {
-      const foundEvent = events.find(event => event.event_type === priority);
-      if (foundEvent) return priority;
+    for (const kw of priorityKeywords) {
+      const foundEvent = events.find(event => (event.event_type || '').toLowerCase().includes(kw));
+      if (foundEvent && foundEvent.event_type) return foundEvent.event_type;
     }
     
     // Fallback to first event's type
-    return events[0].event_type || 'default';
+    return events[0].event_type || 'Technical';
   }
 
   /**
@@ -597,13 +668,14 @@ export class CalendarComponent implements OnInit, OnDestroy {
     const primaryType = this.getPrimaryEventType(events);
     const color = this.getEventColor(primaryType);
     
-    // Return rgba with low opacity for background
+    // Return rgba with appropriate opacity for background
     const hex = color.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16);
-    const g = parseInt(hex.substr(2, 2), 16);
-    const b = parseInt(hex.substr(4, 2), 16);
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
     
-    return `rgba(${r}, ${g}, ${b}, 0.12)`;
+    const alpha = this.isDarkMode ? 0.22 : 0.14;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
   /**

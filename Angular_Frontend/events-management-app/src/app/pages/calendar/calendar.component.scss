@@ -1,15 +1,23 @@
 /* Calendar Component - Glassmorphism Design */
 
 .calendar-container {
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   padding: 0;
   padding-top: 80px; /* Add padding to account for navbar */
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden; /* Keep page fixed and prevent window from scrolling */
+  box-sizing: border-box;
   
   &.dark-theme {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  }
+
+  @media (max-width: 768px) {
+    height: auto;
+    max-height: none;
+    overflow: visible;
   }
 }
 
@@ -102,8 +110,11 @@
 .calendar-layout {
   display: grid;
   grid-template-columns: 350px 1fr;
-  min-height: 100vh;
+  height: calc(100vh - 80px);
+  max-height: calc(100vh - 80px);
   gap: 0;
+  overflow: hidden;
+  box-sizing: border-box;
   
   @media (max-width: 1024px) {
     grid-template-columns: 300px 1fr;
@@ -112,19 +123,24 @@
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
+    height: auto;
+    max-height: none;
+    overflow: visible;
   }
 }
 
-/* Sidebar Styling */
+/* Sidebar Styling - Fixed in Place with Independent Scroll */
 .calendar-sidebar {
   background: var(--glass-bg, rgba(255, 255, 255, 0.25));
   backdrop-filter: blur(20px);
   border-right: 1px solid var(--glass-border, rgba(255, 255, 255, 0.3));
-  padding: 2rem 1.5rem;
+  padding: 1.5rem 1.25rem;
   overflow-y: auto;
-  position: sticky;
-  top: 0;
-  height: 100vh;
+  overflow-x: hidden;
+  height: 100%;
+  max-height: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
   
   .dark-theme & {
     background: rgba(15, 23, 42, 0.6);
@@ -133,8 +149,10 @@
   
   @media (max-width: 768px) {
     height: auto;
+    max-height: none;
     position: relative;
     padding: 1rem;
+    overflow: visible;
   }
 }
 
@@ -285,16 +303,22 @@
   
   .event-dots {
     display: flex;
-    gap: 1px;
+    gap: 2.5px;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
+    margin-top: 2px;
     
     .event-dot {
-      width: 3px;
-      height: 3px;
+      width: 5.5px;
+      height: 5.5px;
       border-radius: 50%;
-      opacity: 0.8;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+      transition: transform 0.2s ease;
+      
+      &:hover {
+        transform: scale(1.4);
+      }
     }
   }
 }
@@ -459,10 +483,15 @@
   }
 }
 
-/* Calendar Grid Container */
+/* Calendar Grid Container - Independent Scroll Area */
 .calendar-grid-container {
-  padding: 2rem;
+  padding: 1.5rem 2rem;
   background: var(--bg-primary, #ffffff);
+  height: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
   
   .dark-theme & {
     background: #0f172a;
@@ -470,6 +499,42 @@
   
   @media (max-width: 768px) {
     padding: 1rem;
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+/* Custom Slim Scrollbars for Independent Sidebar & Grid Scrolling */
+.calendar-sidebar,
+.calendar-grid-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(58, 114, 236, 0.35) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(58, 114, 236, 0.25);
+    border-radius: 999px;
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: rgba(58, 114, 236, 0.5);
+    }
+  }
+
+  .dark-theme &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
   }
 }
 
@@ -753,28 +818,40 @@
       line-height: 1.2;
       
       .event-title {
-        display: block;
+        display: flex;
+        align-items: center;
+        gap: 6px;
         font-weight: 700; // Increased for prominence
-        font-size: 1rem; // Significantly increased to use available space
+        font-size: 0.98rem; // Clean readable size
         color: var(--text-primary, #1e293b);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        margin-bottom: 0.1rem; // Small spacing between title and time
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        margin-bottom: 0.1rem;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
         
         .dark-theme & {
           color: #f8fafc;
           text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
         }
+
+        .event-type-dot {
+          display: inline-block;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          flex-shrink: 0;
+          box-shadow: 0 0 5px rgba(0, 0, 0, 0.25);
+        }
       }
       
       .event-time {
         display: block;
-        font-size: 0.85rem; // Significantly increased from 0.7rem
-        font-weight: 600; // Increased weight for visibility
+        padding-left: 14px; // aligns under title text beside dot
+        font-size: 0.82rem;
+        font-weight: 600;
         color: var(--text-secondary, #64748b);
-        opacity: 1; // Full opacity for maximum visibility
+        opacity: 0.9;
         text-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
         
         .dark-theme & {

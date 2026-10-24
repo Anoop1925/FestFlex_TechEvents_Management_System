@@ -274,10 +274,16 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     this.route.queryParams.subscribe(params => {
       if (params['showLogin'] === 'true' && params['feature'] && isPlatformBrowser(this.platformId)) {
         const featureName = params['feature'] === 'calendar' ? 'Calendar' : 'Results';
-        // Delay to ensure the component is fully loaded
+        // Clear query parameters so the URL remains clean and reload doesn't re-trigger
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: {},
+          replaceUrl: true
+        });
+        
         setTimeout(() => {
           this.showLoginRequiredPopup(`access the ${featureName.toLowerCase()}`);
-        }, 500);
+        }, 150);
       }
     });
   }
@@ -299,20 +305,51 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     }, 1000);
   }
 
+  private parseEventDateTime(dateStr: string, timeStr?: string): Date {
+    if (!dateStr) return new Date();
+    
+    // If time contains a range like "09:00 AM - 05:00 PM", take only the start time "09:00 AM"
+    let startTime = timeStr ? timeStr.split('-')[0].trim() : '';
+    
+    // Check if ISO format YYYY-MM-DD
+    const dateParts = dateStr.trim().split('-');
+    if (dateParts.length === 3) {
+      const year = parseInt(dateParts[0], 10);
+      const month = parseInt(dateParts[1], 10) - 1;
+      const day = parseInt(dateParts[2], 10);
+      
+      let hours = 0;
+      let minutes = 0;
+      
+      if (startTime) {
+        const timeMatch = startTime.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+        if (timeMatch) {
+          hours = parseInt(timeMatch[1], 10);
+          minutes = parseInt(timeMatch[2], 10);
+          const meridian = timeMatch[3] ? timeMatch[3].toUpperCase() : null;
+          if (meridian === 'PM' && hours < 12) hours += 12;
+          if (meridian === 'AM' && hours === 12) hours = 0;
+        }
+      }
+      return new Date(year, month, day, hours, minutes);
+    }
+    
+    return new Date(`${dateStr} ${startTime}`.trim());
+  }
+
   private updateEventTimer(): void {
     if (!this.nextEvent) {
       this.timeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0 };
       return;
     }
 
-    const dateString = this.nextEvent.event_start_date + ' ' + this.nextEvent.event_time;
-    const eventDate = new Date(dateString);
+    const eventDate = this.parseEventDateTime(this.nextEvent.event_start_date, this.nextEvent.event_time);
     const now = new Date();
     const difference = eventDate.getTime() - now.getTime();
     
     // Handle invalid date parsing
     if (isNaN(eventDate.getTime())) {
-      console.error('Invalid date parsing:', dateString);
+      console.error('Invalid date parsing:', this.nextEvent.event_start_date, this.nextEvent.event_time);
       this.timeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0 };
       return;
     }
@@ -632,7 +669,37 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     
+    // Prevent duplicate login popups if one is already open in the DOM
+    if (document.querySelector('.login-required-popup-backdrop')) {
+      return;
+    }
+
+    let iconSvg = `
+      <path d="M9 12l2 2 4-4"/>
+      <circle cx="12" cy="12" r="9"/>
+    `;
+    let messageText = `You need to login to ${action}. Please sign in to continue and access this feature.`;
+
+    const lowerAction = action.toLowerCase();
+    if (lowerAction.includes('calendar')) {
+      iconSvg = `
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      `;
+      messageText = `You need to login to access the Event Calendar. Please sign in to explore your personalized event schedule and timeline.`;
+    } else if (lowerAction.includes('result')) {
+      iconSvg = `
+        <path d="M9 11H15"/>
+        <path d="M9 15H12"/>
+        <path d="M16 6L18.29 8.29C18.3834 8.38373 18.4572 8.49813 18.5065 8.6244C18.5558 8.75067 18.5794 8.88615 18.5758 9.02195C18.5722 9.15775 18.5415 9.29142 18.4852 9.41441C18.4289 9.5374 18.3482 9.64705 18.248 9.736L9 19H5V15L14.29 5.71C14.3834 5.61663 14.4981 5.54284 14.6244 5.49354C14.7507 5.44424 14.8862 5.42058 15.022 5.42405C15.1578 5.42753 15.2914 5.45805 15.4144 5.51395C15.5374 5.56986 15.6471 5.6502 15.736 5.75L16 6Z"/>
+      `;
+      messageText = `You need to login to view competition Results. Please sign in to check participant scores, rankings, and winners.`;
+    }
+    
     const popup = document.createElement('div');
+    popup.className = 'login-required-popup-backdrop';
     popup.innerHTML = `
       <div style="
         position: fixed;
@@ -640,7 +707,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.6);
+        background: rgba(0, 0, 0, 0.65);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -654,13 +721,13 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
           border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.2));
           border-radius: 1.5rem;
           padding: 2.5rem;
-          max-width: 450px;
+          max-width: 460px;
           width: 90%;
           text-align: center;
-          box-shadow: var(--glass-shadow, 0 8px 32px rgba(31, 38, 135, 0.2)), 0 20px 60px rgba(58, 114, 236, 0.15);
+          box-shadow: var(--glass-shadow, 0 8px 32px rgba(31, 38, 135, 0.2)), 0 20px 60px rgba(58, 114, 236, 0.2);
           position: relative;
           overflow: hidden;
-          animation: slideIn 0.4s ease-out;
+          animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
           transform: translateY(0);
         ">
           <div style="
@@ -678,7 +745,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle at 50% 50%, rgba(58, 114, 236, 0.03) 0%, transparent 70%);
+            background: radial-gradient(circle at 50% 50%, rgba(58, 114, 236, 0.05) 0%, transparent 70%);
             pointer-events: none;
           "></div>
           <div style="
@@ -695,8 +762,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
             z-index: 1;
           ">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
-              <path d="M9 12l2 2 4-4"/>
-              <circle cx="12" cy="12" r="9"/>
+              ${iconSvg}
             </svg>
           </div>
           <h3 style="
@@ -715,18 +781,18 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
             color: var(--text-secondary, #64748b); 
             margin-bottom: 2rem; 
             line-height: 1.6;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             position: relative;
             z-index: 1;
           ">
-            You need to login to ${action}. Please sign in to continue and access this feature.
+            ${messageText}
           </p>
           <div style="display: flex; gap: 1rem; justify-content: center; position: relative; z-index: 1;">
             <button id="loginBtn" style="
               background: linear-gradient(135deg, #3A72EC, #5B8CEF);
               color: white;
               border: none;
-              padding: 1rem 2rem;
+              padding: 0.9rem 2.2rem;
               border-radius: 1rem;
               cursor: pointer;
               font-weight: 600;
@@ -740,7 +806,7 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
               background: var(--glass-bg, rgba(255, 255, 255, 0.1));
               color: var(--text-secondary, #64748b);
               border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.2));
-              padding: 1rem 2rem;
+              padding: 0.9rem 2.2rem;
               border-radius: 1rem;
               cursor: pointer;
               font-weight: 600;
@@ -780,20 +846,26 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
     
     document.body.appendChild(popup);
     
+    const removeModal = () => {
+      if (popup.parentNode) {
+        popup.parentNode.removeChild(popup);
+      }
+    };
+
     // Add click handlers
     popup.querySelector('#loginBtn')?.addEventListener('click', () => {
-      document.body.removeChild(popup);
+      removeModal();
       this.router.navigate(['/auth/signin']);
     });
     
     popup.querySelector('#closeBtn')?.addEventListener('click', () => {
-      document.body.removeChild(popup);
+      removeModal();
     });
     
     // Close on backdrop click
     popup.addEventListener('click', (e) => {
-      if (e.target === popup) {
-        document.body.removeChild(popup);
+      if (e.target === popup.firstElementChild) {
+        removeModal();
       }
     });
   }
@@ -1160,8 +1232,8 @@ export class HomeComponent implements OnInit, OnDestroy, AfterViewInit {
       if (!eventStartDateStr) return true; // Include events without dates to be safe
       
       try {
-        // Create the exact start datetime of the event
-        const eventStartDateTime = new Date(eventStartDateStr + ' ' + eventTimeStr);
+        // Create the exact start datetime of the event using robust parser
+        const eventStartDateTime = this.parseEventDateTime(eventStartDateStr, eventTimeStr);
         
         // Event is upcoming if its start time is in the future
         const isUpcoming = eventStartDateTime > now;

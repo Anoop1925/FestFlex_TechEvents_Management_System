@@ -1,0 +1,1 @@
+-- Refer to /supabase-schema.sql in the root directory for the full SQL schema and seed data.

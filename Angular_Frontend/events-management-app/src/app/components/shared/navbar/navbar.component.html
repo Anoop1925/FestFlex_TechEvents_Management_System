@@ -44,7 +44,7 @@
       </a>
 
       <a routerLink="/calendar" routerLinkActive="active" class="nav-item calendar-link" 
-         [class.disabled]="!isLoggedIn" (click)="handleCalendarClick($event)">
+         [class.disabled]="!isLoggedIn">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
           <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
           <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -55,7 +55,7 @@
       </a>
 
       <a routerLink="/results" routerLinkActive="active" class="nav-item results-link" 
-         [class.disabled]="!isLoggedIn" (click)="handleResultsClick($event)">
+         [class.disabled]="!isLoggedIn">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
           <path d="M9 11H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M9 15H12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>

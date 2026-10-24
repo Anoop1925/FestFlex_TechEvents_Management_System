@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jboss-deployment-structure>
+    <deployment>
+
+        <!--
+            Tell WildFly NOT to activate its JPA/Hibernate subsystem for this WAR.
+            Spring Boot manages its own JPA via spring-boot-starter-data-jpa.
+            Without this WildFly tries to manage persistence.xml itself and fails.
+        -->
+        <exclude-subsystems>
+            <subsystem name="jpa"/>
+        </exclude-subsystems>
+
+        <!--
+            Exclude WildFly modules that conflict with the JARs bundled inside the WAR.
+            Spring Boot bundles its own Hibernate, Jackson, SLF4J/Logback, and Hibernate Validator.
+            If WildFly's versions are loaded they clash and cause ClassCastException /
+            NoSuchMethodError / duplicate bindings.
+        -->
+        <exclusions>
+            <!-- WildFly's own Hibernate ORM (conflicts with Spring Boot's bundled Hibernate) -->
+            <module name="org.hibernate.orm.core"/>
+
+            <!-- WildFly's Jakarta Persistence API (use the one inside the WAR) -->
+            <module name="jakarta.persistence.api"/>
+
+            <!-- WildFly's Bean Validation / Hibernate Validator -->
+            <module name="org.hibernate.validator"/>
+
+            <!-- WildFly's SLF4J bridge and impl (Spring Boot bundles Logback as its SLF4J impl) -->
+            <module name="org.slf4j"/>
+            <module name="org.slf4j.impl"/>
+            <module name="org.jboss.logging.jul-to-slf4j-stub"/>
+
+            <!-- WildFly's bundled Jackson (Spring Boot bundles its own version) -->
+            <module name="com.fasterxml.jackson.core.jackson-core"/>
+            <module name="com.fasterxml.jackson.core.jackson-databind"/>
+            <module name="com.fasterxml.jackson.core.jackson-annotations"/>
+            <module name="com.fasterxml.jackson.datatype.jackson-datatype-jdk8"/>
+            <module name="com.fasterxml.jackson.datatype.jackson-datatype-jsr310"/>
+            <module name="com.fasterxml.jackson.jaxrs.jackson-jaxrs-json-provider"/>
+
+            <!-- WildFly's RESTEasy/JAX-RS (can conflict with Spring MVC) -->
+            <module name="org.jboss.resteasy.resteasy-jaxrs"/>
+            <module name="org.jboss.resteasy.resteasy-jackson2-provider"/>
+
+            <!-- WildFly's Netty (conflicts with any Netty bundled in the WAR) -->
+            <module name="io.netty"/>
+
+            <!-- WildFly's Undertow (embedded servlet container, not needed inside WildFly) -->
+            <module name="io.undertow.core"/>
+            <module name="io.undertow.servlet"/>
+
+            <!-- WildFly's weld/CDI (conflicts with Spring's dependency injection) -->
+            <module name="org.jboss.weld.core"/>
+            <module name="org.jboss.weld.spi"/>
+        </exclusions>
+
+        <!--
+            Explicitly allow access to the Servlet API from WildFly
+            (needed because Tomcat is marked as `provided` in pom.xml)
+        -->
+        <dependencies>
+            <module name="jakarta.servlet.api"/>
+        </dependencies>
+
+    </deployment>
+</jboss-deployment-structure>

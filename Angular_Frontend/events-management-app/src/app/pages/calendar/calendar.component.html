@@ -74,7 +74,8 @@
             <div class="event-dots" *ngIf="day.events.length > 0">
               <div class="event-dot" 
                    *ngFor="let event of day.events | slice:0:3"
-                   [style.background-color]="getEventColor(event.event_type || 'default')">
+                   [style.background-color]="getEventColor(event.event_type || '')"
+                   [title]="event.event_name + ' (' + (event.event_type || 'Event') + ')'">
               </div>
             </div>
           </div>
@@ -89,10 +90,12 @@
         <div class="selected-events" *ngIf="selectedDateEvents.length > 0; else noEventsSelected">
           <div class="event-item" 
                *ngFor="let event of selectedDateEvents"
-               [style.border-left-color]="getEventColor(event.event_type || 'default')">
-            <div class="event-time">{{ formatEventTime(event.event_time || '') }}</div>
+               [style.border-left-color]="getEventColor(event.event_type || '')">
+            <div class="event-time" [style.color]="getEventColor(event.event_type || '')">{{ formatEventTime(event.event_time || '') }}</div>
             <div class="event-name">{{ event.event_name }}</div>
-            <div class="event-type" [ngClass]="getEventTypeBadge(event.event_type || '')">
+            <div class="event-type" 
+                 [style.background-color]="getEventBadgeBackground(event.event_type || '')"
+                 [style.color]="getEventColor(event.event_type || '')">
               {{ event.event_type }}
             </div>
           </div>
@@ -125,12 +128,14 @@
         <div class="upcoming-events" *ngIf="sidebarUpcomingEvents.length > 0; else noUpcomingEvents">
           <div class="upcoming-event" 
                *ngFor="let event of sidebarUpcomingEvents"
-               [style.border-left-color]="getEventColor(event.event_type || 'default')"
+               [style.border-left-color]="getEventColor(event.event_type || '')"
                (click)="selectEventDate(event.event_start_date || '')">
-            <div class="upcoming-date">{{ formatEventDate(event.event_start_date || '') }}</div>
+            <div class="upcoming-date" [style.color]="getEventColor(event.event_type || '')">{{ formatEventDate(event.event_start_date || '') }}</div>
             <div class="upcoming-name">{{ event.event_name }}</div>
             <div class="upcoming-time">{{ formatEventTime(event.event_time || '') }}</div>
-            <div class="upcoming-type" [ngClass]="getEventTypeBadge(event.event_type || '')">
+            <div class="upcoming-type" 
+                 [style.background-color]="getEventBadgeBackground(event.event_type || '')"
+                 [style.color]="getEventColor(event.event_type || '')">
               {{ event.event_type }}
             </div>
           </div>
@@ -180,7 +185,10 @@
           <div class="day-events" *ngIf="day.events.length > 0">
             <div class="day-event" 
                  *ngFor="let event of day.events | slice:0:3">
-              <span class="event-title">{{ event.event_name }}</span>
+              <span class="event-title">
+                <span class="event-type-dot" [style.background-color]="getEventColor(event.event_type || '')"></span>
+                {{ event.event_name }}
+              </span>
               <span class="event-time">{{ formatEventTime(event.event_time || '') }}</span>
             </div>
             

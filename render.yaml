@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: festflex-backend
+    runtime: docker
+    dockerfilePath: ./Events_BackEnd/Dockerfile
+    dockerContext: ./Events_BackEnd
+    plan: free
+    region: singapore
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: DATABASE_URL
+        value: jdbc:postgresql://aws-0-ap-southeast-2.pooler.supabase.com:5432/postgres?sslmode=require
+      - key: DATABASE_USERNAME
+        value: postgres.mcgxnkdegikrmbqhrqgt
+      - key: DATABASE_PASSWORD
+        value: _s8$u4iAUNr%vNy
+      - key: CORS_ORIGINS
+        value: "*"

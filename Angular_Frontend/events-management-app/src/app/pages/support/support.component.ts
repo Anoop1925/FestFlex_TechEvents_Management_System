@@ -80,8 +80,13 @@ export class SupportComponent implements OnInit, AfterViewInit {
   }
 
   private showLoginRequiredPopup() {
+    if (document.querySelector('.login-required-popup-backdrop')) {
+      return;
+    }
+
     // Create backdrop
     const backdrop = document.createElement('div');
+    backdrop.className = 'login-required-popup-backdrop';
     backdrop.style.cssText = `
       position: fixed;
       top: 0;
