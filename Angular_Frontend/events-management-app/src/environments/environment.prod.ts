@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://festflex-backend-production.up.railway.app',
+  apiUrl: 'https://festflex-backend.onrender.com',
   geminiApiKey: '', // Will be handled by backend for security
   appName: 'FestFlex',
   version: '1.0.0',
